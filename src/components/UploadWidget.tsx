@@ -5,6 +5,8 @@ import { showSuccessToast, showErrorToast } from '@/lib/toast-utils';
 
 interface UploadWidgetProps {
   slug: string;
+  onUploadStart?: () => void;
+  onUploadComplete?: (mediaId: string) => void;
 }
 
 interface UploadProgress {
@@ -42,7 +44,7 @@ const getErrorMessage = (error: Error): string => {
   return error.message || 'Upload failed. Please try again.';
 };
 
-export const UploadWidget = ({ slug }: UploadWidgetProps) => {
+export const UploadWidget = ({ slug, onUploadStart, onUploadComplete }: UploadWidgetProps) => {
   const [uploads, setUploads] = useState<UploadProgress[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
@@ -50,6 +52,11 @@ export const UploadWidget = ({ slug }: UploadWidgetProps) => {
 
   const uploadMutation = useMutation({
     mutationFn: async (file: File) => {
+      // Notify that upload is starting
+      if (onUploadStart) {
+        onUploadStart();
+      }
+
       // Update status to uploading
       setUploads((prev) =>
         prev.map((u) => (u.file === file ? { ...u, status: 'uploading' as const } : u))
@@ -78,13 +85,18 @@ export const UploadWidget = ({ slug }: UploadWidgetProps) => {
       );
 
       // Complete upload
-      await apiClient.completeUpload(slug, {
+      const result = await apiClient.completeUpload(slug, {
         path: uploadRequest.path,
         filename: file.name,
         mimeType: file.type,
         size: file.size,
         ...dimensions,
       });
+
+      // Track this upload with real ID
+      if (onUploadComplete) {
+        onUploadComplete(result.id);
+      }
 
       // Update status to complete
       setUploads((prev) =>

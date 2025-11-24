@@ -14,6 +14,8 @@ export const MemoryPage = () => {
   const queryClient = useQueryClient();
   const [isConnected, setIsConnected] = useState(false);
   const { theme, toggleTheme } = useTheme();
+  const recentlyUploadedIds = useState<Set<string>>(() => new Set())[0];
+  const [isUploading, setIsUploading] = useState(false);
 
   // Fetch memory data
   const { data, isLoading, error } = useQuery({
@@ -29,16 +31,60 @@ export const MemoryPage = () => {
     memorySocketClient.connect(data.memory.id);
 
     const handleNewMedia = (mediaItem: MediaItem) => {
+      // Check if we're currently uploading - suppress toast
+      if (isUploading) {
+        // Mark this ID as ours
+        recentlyUploadedIds.add(mediaItem.id);
+        // Remove from tracking after a delay
+        setTimeout(() => recentlyUploadedIds.delete(mediaItem.id), 5000);
+
+        // Add to cache but don't show toast
+        queryClient.setQueryData(['memory', slug], (old: any) => {
+          if (!old) return old;
+          const exists = old.mediaItems.some((item: MediaItem) => item.id === mediaItem.id);
+          if (exists) return old;
+
+          return {
+            ...old,
+            mediaItems: [mediaItem, ...old.mediaItems],
+          };
+        });
+        return;
+      }
+
+      // Check if this was uploaded by current tab (safety check)
+      if (recentlyUploadedIds.has(mediaItem.id)) {
+        // Remove from tracking after a delay
+        setTimeout(() => recentlyUploadedIds.delete(mediaItem.id), 5000);
+
+        // Add to cache but don't show toast
+        queryClient.setQueryData(['memory', slug], (old: any) => {
+          if (!old) return old;
+          const exists = old.mediaItems.some((item: MediaItem) => item.id === mediaItem.id);
+          if (exists) return old;
+
+          return {
+            ...old,
+            mediaItems: [mediaItem, ...old.mediaItems],
+          };
+        });
+        return;
+      }
+
       // Add new media to the query cache
       queryClient.setQueryData(['memory', slug], (old: any) => {
         if (!old) return old;
+        // Prevent duplicates
+        const exists = old.mediaItems.some((item: MediaItem) => item.id === mediaItem.id);
+        if (exists) return old;
+
         return {
           ...old,
           mediaItems: [mediaItem, ...old.mediaItems],
         };
       });
 
-      // Show live update toast notification
+      // Show toast for uploads from others
       showLiveUpdateToast('Someone just uploaded a photo!', mediaItem.url);
     };
 
@@ -49,7 +95,7 @@ export const MemoryPage = () => {
       memorySocketClient.offNewMedia(handleNewMedia);
       memorySocketClient.disconnect();
     };
-  }, [data?.memory?.id, queryClient, slug]);
+  }, [data?.memory?.id, queryClient, slug, recentlyUploadedIds, isUploading]);
 
   if (isLoading) {
     return (
@@ -264,7 +310,14 @@ export const MemoryPage = () => {
 
       {/* Upload Widget */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <UploadWidget slug={slug!} />
+        <UploadWidget
+          slug={slug!}
+          onUploadStart={() => setIsUploading(true)}
+          onUploadComplete={(mediaId: string) => {
+            recentlyUploadedIds.add(mediaId);
+            setIsUploading(false);
+          }}
+        />
       </div>
 
       {/* Gallery */}

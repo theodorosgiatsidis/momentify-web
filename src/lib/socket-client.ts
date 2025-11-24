@@ -3,6 +3,16 @@ import type { MediaItem } from '@/types';
 
 const WS_URL = import.meta.env.VITE_WS_URL || 'http://localhost:3001';
 
+// Generate or retrieve session ID
+const getSessionId = (): string => {
+  let sessionId = sessionStorage.getItem('momentify_session_id');
+  if (!sessionId) {
+    sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    sessionStorage.setItem('momentify_session_id', sessionId);
+  }
+  return sessionId;
+};
+
 export class MemorySocketClient {
   private socket: Socket | null = null;
   private memoryId: string | null = null;
@@ -91,6 +101,10 @@ export class MemorySocketClient {
 
   isConnected(): boolean {
     return this.socket?.connected ?? false;
+  }
+
+  getSessionId(): string {
+    return getSessionId();
   }
 }
 
