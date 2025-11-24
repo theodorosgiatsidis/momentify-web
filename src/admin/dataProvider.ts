@@ -89,6 +89,11 @@ export const dataProvider: DataProvider = {
   },
 
   delete: async (resource, params) => {
+    if (resource === "memories") {
+      await apiClient.deleteMemory(params.id as string);
+      return { data: { id: params.id } as any };
+    }
+
     if (resource === "media") {
       await apiClient.deleteMediaItem(params.id as string);
       return { data: { id: params.id } as any };

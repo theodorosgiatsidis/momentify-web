@@ -179,6 +179,10 @@ class ApiClient {
     await this.client.delete(`/memories/media/${mediaId}`);
   }
 
+  async deleteMemory(slug: string): Promise<void> {
+    await this.client.delete(`/admin/memories/${slug}`);
+  }
+
   // Direct upload to Supabase
   async uploadToSignedUrl(
     signedUrl: string,

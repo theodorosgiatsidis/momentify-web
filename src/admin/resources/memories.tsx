@@ -14,6 +14,7 @@ import {
   SimpleShowLayout,
   UrlField,
   NumberField,
+  DeleteButton,
 } from "react-admin";
 
 export const MemoryList = () => (
@@ -25,6 +26,7 @@ export const MemoryList = () => (
       <DateField source="eventDate" />
       <NumberField source="mediaCount" label="Media Items" />
       <DateField source="createdAt" showTime />
+      <DeleteButton />
     </Datagrid>
   </List>
 );
@@ -68,6 +70,10 @@ export const MemoryShow = () => (
             {window.location.origin}/memory/{(window as any).record?.slug}
           </a>
         </p>
+      </div>
+
+      <div style={{ marginTop: "2rem" }}>
+        <DeleteButton />
       </div>
     </SimpleShowLayout>
   </Show>
