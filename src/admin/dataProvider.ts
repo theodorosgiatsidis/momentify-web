@@ -78,9 +78,31 @@ export const dataProvider: DataProvider = {
     throw new Error(`Unknown resource: ${resource}`);
   },
 
-  update: async (_resource, params) => {
-    // Not implemented for this use case
-    return { data: params.data as any };
+  update: async (resource, params) => {
+    if (resource === 'memories') {
+      const formData = new FormData();
+      formData.append('title', params.data.title);
+      if (params.data.description) {
+        formData.append('description', params.data.description);
+      }
+
+      // Ensure eventDate is in ISO 8601 format
+      const eventDate =
+        params.data.eventDate instanceof Date
+          ? params.data.eventDate.toISOString()
+          : new Date(params.data.eventDate).toISOString();
+      formData.append('eventDate', eventDate);
+
+      // Only add cover if a new file was uploaded
+      if (params.data.cover?.rawFile) {
+        formData.append('cover', params.data.cover.rawFile);
+      }
+
+      const data = await apiClient.updateMemory(params.id as string, formData);
+      return { data: { ...data, id: data.slug, uuid: data.id } as any };
+    }
+
+    throw new Error(`Unknown resource: ${resource}`);
   },
 
   updateMany: async (_resource, _params) => {

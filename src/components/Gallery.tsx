@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import type { MediaItem } from '@/types';
 
 interface GalleryProps {
@@ -14,6 +14,86 @@ export const Gallery = ({ mediaItems }: GalleryProps) => {
   const modalRef = useRef<HTMLDivElement>(null);
 
   const selectedMedia = selectedIndex !== null ? mediaItems[selectedIndex] : null;
+
+  const handleImageLoad = (mediaId: string) => {
+    setImageLoaded((prev) => new Set(prev).add(mediaId));
+  };
+
+  const openLightbox = (index: number) => {
+    setSelectedIndex(index);
+    setSlideDirection(null);
+  };
+
+  const closeLightbox = () => {
+    setSelectedIndex(null);
+    setTouchOffset({ x: 0, y: 0 });
+  };
+
+  const goToNext = useCallback(() => {
+    if (selectedIndex === null) return;
+    const nextIndex = (selectedIndex + 1) % mediaItems.length;
+    setSlideDirection('left');
+    setTimeout(() => {
+      setSelectedIndex(nextIndex);
+      setTimeout(() => setSlideDirection(null), 50);
+    }, 300);
+  }, [selectedIndex, mediaItems.length]);
+
+  const goToPrevious = useCallback(() => {
+    if (selectedIndex === null) return;
+    const prevIndex = selectedIndex === 0 ? mediaItems.length - 1 : selectedIndex - 1;
+    setSlideDirection('right');
+    setTimeout(() => {
+      setSelectedIndex(prevIndex);
+      setTimeout(() => setSlideDirection(null), 50);
+    }, 300);
+  }, [selectedIndex, mediaItems.length]);
+
+  // Keyboard navigation
+  useEffect(() => {
+    if (selectedIndex === null) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowLeft') goToPrevious();
+      else if (e.key === 'ArrowRight') goToNext();
+      else if (e.key === 'Escape') closeLightbox();
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [selectedIndex, goToNext, goToPrevious]);
+
+  // Touch handlers for swipe gestures
+  const handleTouchStart = (e: React.TouchEvent) => {
+    const touch = e.touches[0];
+    setTouchStart({ x: touch.clientX, y: touch.clientY });
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!touchStart) return;
+
+    const touch = e.touches[0];
+    const deltaX = touch.clientX - touchStart.x;
+    const deltaY = touch.clientY - touchStart.y;
+
+    // Only allow vertical swipe down to close
+    if (Math.abs(deltaY) > Math.abs(deltaX) && deltaY > 0) {
+      setTouchOffset({ x: 0, y: deltaY });
+    }
+  };
+
+  const handleTouchEnd = () => {
+    if (!touchStart) return;
+
+    // Close if swiped down more than 100px
+    if (touchOffset.y > 100) {
+      closeLightbox();
+    } else {
+      setTouchOffset({ x: 0, y: 0 });
+    }
+
+    setTouchStart(null);
+  };
 
   if (mediaItems.length === 0) {
     return (
@@ -49,86 +129,6 @@ export const Gallery = ({ mediaItems }: GalleryProps) => {
       </div>
     );
   }
-
-  const handleImageLoad = (mediaId: string) => {
-    setImageLoaded((prev) => new Set(prev).add(mediaId));
-  };
-
-  const openLightbox = (index: number) => {
-    setSelectedIndex(index);
-    setSlideDirection(null);
-  };
-
-  const closeLightbox = () => {
-    setSelectedIndex(null);
-    setTouchOffset({ x: 0, y: 0 });
-  };
-
-  const goToNext = () => {
-    if (selectedIndex === null) return;
-    const nextIndex = (selectedIndex + 1) % mediaItems.length;
-    setSlideDirection('left');
-    setTimeout(() => {
-      setSelectedIndex(nextIndex);
-      setTimeout(() => setSlideDirection(null), 50);
-    }, 300);
-  };
-
-  const goToPrevious = () => {
-    if (selectedIndex === null) return;
-    const prevIndex = selectedIndex === 0 ? mediaItems.length - 1 : selectedIndex - 1;
-    setSlideDirection('right');
-    setTimeout(() => {
-      setSelectedIndex(prevIndex);
-      setTimeout(() => setSlideDirection(null), 50);
-    }, 300);
-  };
-
-  // Keyboard navigation
-  useEffect(() => {
-    if (selectedIndex === null) return;
-
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'ArrowLeft') goToPrevious();
-      else if (e.key === 'ArrowRight') goToNext();
-      else if (e.key === 'Escape') closeLightbox();
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [selectedIndex]);
-
-  // Touch handlers for swipe gestures
-  const handleTouchStart = (e: React.TouchEvent) => {
-    const touch = e.touches[0];
-    setTouchStart({ x: touch.clientX, y: touch.clientY });
-  };
-
-  const handleTouchMove = (e: React.TouchEvent) => {
-    if (!touchStart) return;
-
-    const touch = e.touches[0];
-    const deltaX = touch.clientX - touchStart.x;
-    const deltaY = touch.clientY - touchStart.y;
-
-    // Only allow vertical swipe down to close
-    if (Math.abs(deltaY) > Math.abs(deltaX) && deltaY > 0) {
-      setTouchOffset({ x: 0, y: deltaY });
-    }
-  };
-
-  const handleTouchEnd = () => {
-    if (!touchStart) return;
-
-    // Close if swiped down more than 100px
-    if (touchOffset.y > 100) {
-      closeLightbox();
-    } else {
-      setTouchOffset({ x: 0, y: 0 });
-    }
-
-    setTouchStart(null);
-  };
 
   return (
     <>

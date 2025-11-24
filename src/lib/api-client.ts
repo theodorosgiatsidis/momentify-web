@@ -102,6 +102,15 @@ class ApiClient {
     return data;
   }
 
+  async updateMemory(slug: string, formData: FormData): Promise<Memory> {
+    const { data } = await this.client.patch<Memory>(`/admin/memories/${slug}`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return data;
+  }
+
   async listMemories(page = 1, limit = 20): Promise<MemoryListResponse> {
     const { data } = await this.client.get<MemoryListResponse>('/admin/memories', {
       params: { page, limit },

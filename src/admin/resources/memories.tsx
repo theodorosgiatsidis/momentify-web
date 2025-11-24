@@ -5,6 +5,7 @@ import {
   DateField,
   ImageField,
   Create,
+  Edit,
   SimpleForm,
   TextInput,
   DateTimeInput,
@@ -15,6 +16,7 @@ import {
   UrlField,
   NumberField,
   DeleteButton,
+  EditButton,
   useRecordContext,
 } from 'react-admin';
 
@@ -27,6 +29,7 @@ export const MemoryList = () => (
       <DateField source="eventDate" />
       <NumberField source="mediaCount" label="Media Items" />
       <DateField source="createdAt" showTime />
+      <EditButton />
       <DeleteButton />
     </Datagrid>
   </List>
@@ -43,6 +46,20 @@ export const MemoryCreate = () => (
       </ImageInput>
     </SimpleForm>
   </Create>
+);
+
+export const MemoryEdit = () => (
+  <Edit>
+    <SimpleForm>
+      <TextInput source="title" validate={[required()]} fullWidth />
+      <TextInput source="description" multiline rows={4} fullWidth />
+      <DateTimeInput source="eventDate" validate={[required()]} />
+      <ImageInput source="cover" label="Cover Image (leave empty to keep current)" accept="image/*">
+        <ImageField source="src" title="title" />
+      </ImageInput>
+      <ImageField source="coverUrl" label="Current Cover Image" />
+    </SimpleForm>
+  </Edit>
 );
 
 const MemoryUrlField = () => {
@@ -84,7 +101,8 @@ export const MemoryShow = () => (
 
       <MemoryUrlField />
 
-      <div style={{ marginTop: '2rem' }}>
+      <div style={{ marginTop: '2rem', display: 'flex', gap: '1rem' }}>
+        <EditButton />
         <DeleteButton />
       </div>
     </SimpleShowLayout>
