@@ -15,6 +15,7 @@ import {
   UrlField,
   NumberField,
   DeleteButton,
+  useRecordContext,
 } from 'react-admin';
 
 export const MemoryList = () => (
@@ -44,6 +45,31 @@ export const MemoryCreate = () => (
   </Create>
 );
 
+const MemoryUrlField = () => {
+  const record = useRecordContext();
+  if (!record || !record.slug) return null;
+
+  const memoryUrl = `${window.location.origin}/memory/${record.slug}`;
+
+  return (
+    <div style={{ marginTop: '2rem' }}>
+      <h3>Memory URL</h3>
+      <p>
+        Share this link or QR code with guests:
+        <br />
+        <a
+          href={memoryUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{ fontSize: '1.2rem', fontWeight: 'bold' }}
+        >
+          {memoryUrl}
+        </a>
+      </p>
+    </div>
+  );
+};
+
 export const MemoryShow = () => (
   <Show>
     <SimpleShowLayout>
@@ -56,21 +82,7 @@ export const MemoryShow = () => (
       <UrlField source="qrCodeUrl" label="Download QR Code" target="_blank" />
       <DateField source="createdAt" showTime />
 
-      <div style={{ marginTop: '2rem' }}>
-        <h3>Memory URL</h3>
-        <p>
-          Share this link or QR code with guests:
-          <br />
-          <a
-            href={`${window.location.origin}/memory/${(window as any).record?.slug}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{ fontSize: '1.2rem', fontWeight: 'bold' }}
-          >
-            {window.location.origin}/memory/{(window as any).record?.slug}
-          </a>
-        </p>
-      </div>
+      <MemoryUrlField />
 
       <div style={{ marginTop: '2rem' }}>
         <DeleteButton />

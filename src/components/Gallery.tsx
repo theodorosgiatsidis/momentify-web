@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import type { MediaItem } from '@/types';
 
 interface GalleryProps {
@@ -6,8 +6,14 @@ interface GalleryProps {
 }
 
 export const Gallery = ({ mediaItems }: GalleryProps) => {
-  const [selectedMedia, setSelectedMedia] = useState<MediaItem | null>(null);
+  const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const [imageLoaded, setImageLoaded] = useState<Set<string>>(new Set());
+  const [slideDirection, setSlideDirection] = useState<'left' | 'right' | null>(null);
+  const [touchStart, setTouchStart] = useState<{ x: number; y: number } | null>(null);
+  const [touchOffset, setTouchOffset] = useState({ x: 0, y: 0 });
+  const modalRef = useRef<HTMLDivElement>(null);
+
+  const selectedMedia = selectedIndex !== null ? mediaItems[selectedIndex] : null;
 
   if (mediaItems.length === 0) {
     return (
@@ -48,14 +54,90 @@ export const Gallery = ({ mediaItems }: GalleryProps) => {
     setImageLoaded((prev) => new Set(prev).add(mediaId));
   };
 
+  const openLightbox = (index: number) => {
+    setSelectedIndex(index);
+    setSlideDirection(null);
+  };
+
+  const closeLightbox = () => {
+    setSelectedIndex(null);
+    setTouchOffset({ x: 0, y: 0 });
+  };
+
+  const goToNext = () => {
+    if (selectedIndex === null) return;
+    const nextIndex = (selectedIndex + 1) % mediaItems.length;
+    setSlideDirection('left');
+    setTimeout(() => {
+      setSelectedIndex(nextIndex);
+      setTimeout(() => setSlideDirection(null), 50);
+    }, 300);
+  };
+
+  const goToPrevious = () => {
+    if (selectedIndex === null) return;
+    const prevIndex = selectedIndex === 0 ? mediaItems.length - 1 : selectedIndex - 1;
+    setSlideDirection('right');
+    setTimeout(() => {
+      setSelectedIndex(prevIndex);
+      setTimeout(() => setSlideDirection(null), 50);
+    }, 300);
+  };
+
+  // Keyboard navigation
+  useEffect(() => {
+    if (selectedIndex === null) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowLeft') goToPrevious();
+      else if (e.key === 'ArrowRight') goToNext();
+      else if (e.key === 'Escape') closeLightbox();
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [selectedIndex]);
+
+  // Touch handlers for swipe gestures
+  const handleTouchStart = (e: React.TouchEvent) => {
+    const touch = e.touches[0];
+    setTouchStart({ x: touch.clientX, y: touch.clientY });
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!touchStart) return;
+
+    const touch = e.touches[0];
+    const deltaX = touch.clientX - touchStart.x;
+    const deltaY = touch.clientY - touchStart.y;
+
+    // Only allow vertical swipe down to close
+    if (Math.abs(deltaY) > Math.abs(deltaX) && deltaY > 0) {
+      setTouchOffset({ x: 0, y: deltaY });
+    }
+  };
+
+  const handleTouchEnd = () => {
+    if (!touchStart) return;
+
+    // Close if swiped down more than 100px
+    if (touchOffset.y > 100) {
+      closeLightbox();
+    } else {
+      setTouchOffset({ x: 0, y: 0 });
+    }
+
+    setTouchStart(null);
+  };
+
   return (
     <>
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
-        {mediaItems.map((media) => (
+        {mediaItems.map((media, index) => (
           <div
             key={media.id}
             className="group relative aspect-square bg-gradient-to-br from-gray-100 to-gray-200 rounded-xl overflow-hidden cursor-pointer transform transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:z-10"
-            onClick={() => setSelectedMedia(media)}
+            onClick={() => openLightbox(index)}
           >
             {media.mimeType.startsWith('image/') ? (
               <>
@@ -109,12 +191,25 @@ export const Gallery = ({ mediaItems }: GalleryProps) => {
       {/* Lightbox Modal */}
       {selectedMedia && (
         <div
-          className="fixed inset-0 bg-black/95 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in"
-          onClick={() => setSelectedMedia(null)}
+          ref={modalRef}
+          className="fixed inset-0 bg-black/95 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+          onClick={closeLightbox}
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
+          style={{
+            transform: `translateY(${touchOffset.y}px)`,
+            opacity: touchOffset.y > 0 ? 1 - touchOffset.y / 300 : 1,
+            transition: touchStart ? 'none' : 'transform 0.3s ease-out, opacity 0.3s ease-out',
+          }}
         >
+          {/* Close button */}
           <button
-            className="absolute top-4 right-4 text-white hover:text-gray-300 transition-all transform hover:scale-110 hover:rotate-90 duration-300 bg-white/10 backdrop-blur-md rounded-full p-3 hover:bg-white/20"
-            onClick={() => setSelectedMedia(null)}
+            className="absolute top-4 right-4 text-white hover:text-gray-300 transition-all transform hover:scale-110 hover:rotate-90 duration-300 bg-white/10 backdrop-blur-md rounded-full p-3 hover:bg-white/20 z-10"
+            onClick={(e) => {
+              e.stopPropagation();
+              closeLightbox();
+            }}
             aria-label="Close"
           >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -127,15 +222,64 @@ export const Gallery = ({ mediaItems }: GalleryProps) => {
             </svg>
           </button>
 
+          {/* Previous button */}
+          {mediaItems.length > 1 && (
+            <button
+              className="absolute left-4 top-1/2 -translate-y-1/2 text-white hover:text-gray-300 transition-all transform hover:scale-110 duration-300 bg-white/10 backdrop-blur-md rounded-full p-3 hover:bg-white/20 z-10"
+              onClick={(e) => {
+                e.stopPropagation();
+                goToPrevious();
+              }}
+              aria-label="Previous"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M15 19l-7-7 7-7"
+                />
+              </svg>
+            </button>
+          )}
+
+          {/* Next button */}
+          {mediaItems.length > 1 && (
+            <button
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-white hover:text-gray-300 transition-all transform hover:scale-110 duration-300 bg-white/10 backdrop-blur-md rounded-full p-3 hover:bg-white/20 z-10"
+              onClick={(e) => {
+                e.stopPropagation();
+                goToNext();
+              }}
+              aria-label="Next"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 5l7 7-7 7"
+                />
+              </svg>
+            </button>
+          )}
+
+          {/* Media content */}
           <div
-            className="max-w-7xl max-h-full animate-scale-in"
+            className={`max-w-7xl max-h-full ${
+              slideDirection === 'left'
+                ? 'animate-slide-out-left'
+                : slideDirection === 'right'
+                  ? 'animate-slide-out-right'
+                  : 'animate-slide-in-new'
+            }`}
             onClick={(e) => e.stopPropagation()}
           >
             {selectedMedia.mimeType.startsWith('image/') ? (
               <img
                 src={selectedMedia.url}
                 alt={selectedMedia.filename}
-                className="max-w-full max-h-[85vh] object-contain rounded-lg shadow-2xl touch-pinch-zoom"
+                className="max-w-full max-h-[85vh] object-contain rounded-lg shadow-2xl"
                 style={{ userSelect: 'none' }}
               />
             ) : (
@@ -165,6 +309,11 @@ export const Gallery = ({ mediaItems }: GalleryProps) => {
                 </svg>
                 {new Date(selectedMedia.uploadedAt).toLocaleString()}
               </p>
+              {mediaItems.length > 1 && (
+                <p className="text-white/50 text-xs mt-2">
+                  {selectedIndex! + 1} / {mediaItems.length}
+                </p>
+              )}
             </div>
           </div>
         </div>
