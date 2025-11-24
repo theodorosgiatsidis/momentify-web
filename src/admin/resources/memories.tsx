@@ -18,7 +18,9 @@ import {
   DeleteButton,
   EditButton,
   useRecordContext,
+  Button,
 } from 'react-admin';
+import { Download } from '@mui/icons-material';
 
 export const MemoryList = () => (
   <List>
@@ -87,6 +89,51 @@ const MemoryUrlField = () => {
   );
 };
 
+const DownloadAllButton = () => {
+  const record = useRecordContext();
+  if (!record || !record.slug) return null;
+
+  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+  const token = localStorage.getItem('accessToken');
+
+  const handleDownload = async () => {
+    try {
+      const response = await fetch(`${API_URL}/admin/memories/${record.slug}/download-all`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Download failed');
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${record.slug}-photos-${new Date().toISOString().split('T')[0]}.zip`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Download failed:', error);
+      alert('Failed to download photos. Please try again.');
+    }
+  };
+
+  return (
+    <Button
+      label="Download All Photos"
+      onClick={handleDownload}
+      startIcon={<Download />}
+      variant="contained"
+      color="primary"
+    />
+  );
+};
+
 export const MemoryShow = () => (
   <Show>
     <SimpleShowLayout>
@@ -101,9 +148,10 @@ export const MemoryShow = () => (
 
       <MemoryUrlField />
 
-      <div style={{ marginTop: '2rem', display: 'flex', gap: '1rem' }}>
+      <div style={{ marginTop: '2rem', display: 'flex', gap: '1rem', alignItems: 'center' }}>
         <EditButton />
         <DeleteButton />
+        <DownloadAllButton />
       </div>
     </SimpleShowLayout>
   </Show>
