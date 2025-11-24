@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
+import Masonry from 'react-masonry-css';
 import { showSuccessToast, showErrorToast } from '@/lib/toast-utils';
 import type { MediaItem } from '@/types';
 
@@ -171,13 +172,24 @@ export const Gallery = ({ mediaItems, isLoading = false }: GalleryProps) => {
     );
   }
 
+  const breakpointColumns = {
+    default: 4,
+    1100: 3,
+    700: 2,
+    500: 2,
+  };
+
   return (
     <>
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
+      <Masonry
+        breakpointCols={breakpointColumns}
+        className="flex -ml-3 sm:-ml-4 w-auto"
+        columnClassName="pl-3 sm:pl-4 bg-clip-padding"
+      >
         {mediaItems.map((media, index) => (
           <div
             key={media.id}
-            className="group relative aspect-square bg-gradient-to-br from-gray-100 to-gray-200 rounded-xl overflow-hidden cursor-pointer transform transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:z-10"
+            className="group relative bg-gradient-to-br from-gray-100 to-gray-200 rounded-xl overflow-hidden cursor-pointer transform transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:z-10 mb-3 sm:mb-4"
             onClick={() => openLightbox(index)}
           >
             {media.mimeType.startsWith('image/') ? (
@@ -227,7 +239,7 @@ export const Gallery = ({ mediaItems, isLoading = false }: GalleryProps) => {
             )}
           </div>
         ))}
-      </div>
+      </Masonry>
 
       {/* Lightbox Modal */}
       {selectedMedia && (

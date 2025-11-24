@@ -2,6 +2,7 @@ import { Admin, Resource, Login } from 'react-admin';
 import { authProvider } from './authProvider';
 import { dataProvider } from './dataProvider';
 import { MemoryList, MemoryCreate, MemoryEdit, MemoryShow } from './resources/memories';
+import { MediaList } from './resources/media';
 
 const LoginPage = () => (
   <Login backgroundImage="https://source.unsplash.com/random/1600x900/?wedding,celebration" />
@@ -23,6 +24,7 @@ export const AdminApp = () => {
         edit={MemoryEdit}
         show={MemoryShow}
       />
+      <Resource name="media" list={MediaList} />
     </Admin>
   );
 };
