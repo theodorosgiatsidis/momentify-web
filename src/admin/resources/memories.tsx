@@ -15,7 +15,7 @@ import {
   UrlField,
   NumberField,
   DeleteButton,
-} from "react-admin";
+} from 'react-admin';
 
 export const MemoryList = () => (
   <List>
@@ -56,7 +56,7 @@ export const MemoryShow = () => (
       <UrlField source="qrCodeUrl" label="Download QR Code" target="_blank" />
       <DateField source="createdAt" showTime />
 
-      <div style={{ marginTop: "2rem" }}>
+      <div style={{ marginTop: '2rem' }}>
         <h3>Memory URL</h3>
         <p>
           Share this link or QR code with guests:
@@ -65,14 +65,14 @@ export const MemoryShow = () => (
             href={`${window.location.origin}/memory/${(window as any).record?.slug}`}
             target="_blank"
             rel="noopener noreferrer"
-            style={{ fontSize: "1.2rem", fontWeight: "bold" }}
+            style={{ fontSize: '1.2rem', fontWeight: 'bold' }}
           >
             {window.location.origin}/memory/{(window as any).record?.slug}
           </a>
         </p>
       </div>
 
-      <div style={{ marginTop: "2rem" }}>
+      <div style={{ marginTop: '2rem' }}>
         <DeleteButton />
       </div>
     </SimpleShowLayout>

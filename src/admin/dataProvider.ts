@@ -1,11 +1,11 @@
-import { DataProvider } from "react-admin";
-import { apiClient } from "@/lib/api-client";
+import { DataProvider } from 'react-admin';
+import { apiClient } from '@/lib/api-client';
 
 export const dataProvider: DataProvider = {
   getList: async (resource, params) => {
     const { page, perPage } = params.pagination;
 
-    if (resource === "memories") {
+    if (resource === 'memories') {
       const data = await apiClient.listMemories(page, perPage);
       return {
         data: data.memories.map((m) => {
@@ -25,7 +25,7 @@ export const dataProvider: DataProvider = {
   },
 
   getOne: async (resource, params) => {
-    if (resource === "memories") {
+    if (resource === 'memories') {
       // params.id is now the slug
       const data = await apiClient.getMemoryBySlugAdmin(params.id as string);
       const { id: uuid, ...rest } = data.memory;
@@ -53,11 +53,11 @@ export const dataProvider: DataProvider = {
   },
 
   create: async (resource, params) => {
-    if (resource === "memories") {
+    if (resource === 'memories') {
       const formData = new FormData();
-      formData.append("title", params.data.title);
+      formData.append('title', params.data.title);
       if (params.data.description) {
-        formData.append("description", params.data.description);
+        formData.append('description', params.data.description);
       }
 
       // Ensure eventDate is in ISO 8601 format
@@ -65,10 +65,10 @@ export const dataProvider: DataProvider = {
         params.data.eventDate instanceof Date
           ? params.data.eventDate.toISOString()
           : new Date(params.data.eventDate).toISOString();
-      formData.append("eventDate", eventDate);
+      formData.append('eventDate', eventDate);
 
       if (params.data.cover?.rawFile) {
-        formData.append("cover", params.data.cover.rawFile);
+        formData.append('cover', params.data.cover.rawFile);
       }
 
       const data = await apiClient.createMemory(formData);
@@ -89,12 +89,12 @@ export const dataProvider: DataProvider = {
   },
 
   delete: async (resource, params) => {
-    if (resource === "memories") {
+    if (resource === 'memories') {
       await apiClient.deleteMemory(params.id as string);
       return { data: { id: params.id } as any };
     }
 
-    if (resource === "media") {
+    if (resource === 'media') {
       await apiClient.deleteMediaItem(params.id as string);
       return { data: { id: params.id } as any };
     }

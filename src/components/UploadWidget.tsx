@@ -1,6 +1,6 @@
-import { useState, useRef, ChangeEvent } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { apiClient } from "@/lib/api-client";
+import { useState, useRef, ChangeEvent } from 'react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { apiClient } from '@/lib/api-client';
 
 interface UploadWidgetProps {
   slug: string;
@@ -9,7 +9,7 @@ interface UploadWidgetProps {
 interface UploadProgress {
   file: File;
   progress: number;
-  status: "pending" | "uploading" | "processing" | "complete" | "error";
+  status: 'pending' | 'uploading' | 'processing' | 'complete' | 'error';
   error?: string;
 }
 
@@ -22,9 +22,7 @@ export const UploadWidget = ({ slug }: UploadWidgetProps) => {
     mutationFn: async (file: File) => {
       // Update status to uploading
       setUploads((prev) =>
-        prev.map((u) =>
-          u.file === file ? { ...u, status: "uploading" as const } : u
-        )
+        prev.map((u) => (u.file === file ? { ...u, status: 'uploading' as const } : u))
       );
 
       // Get file dimensions for images/videos
@@ -38,22 +36,14 @@ export const UploadWidget = ({ slug }: UploadWidgetProps) => {
       });
 
       // Upload to Supabase
-      await apiClient.uploadToSignedUrl(
-        uploadRequest.signedUrl,
-        file,
-        (progress) => {
-          setUploads((prev) =>
-            prev.map((u) => (u.file === file ? { ...u, progress } : u))
-          );
-        }
-      );
+      await apiClient.uploadToSignedUrl(uploadRequest.signedUrl, file, (progress) => {
+        setUploads((prev) => prev.map((u) => (u.file === file ? { ...u, progress } : u)));
+      });
 
       // Update status to processing
       setUploads((prev) =>
         prev.map((u) =>
-          u.file === file
-            ? { ...u, status: "processing" as const, progress: 100 }
-            : u
+          u.file === file ? { ...u, status: 'processing' as const, progress: 100 } : u
         )
       );
 
@@ -68,13 +58,11 @@ export const UploadWidget = ({ slug }: UploadWidgetProps) => {
 
       // Update status to complete
       setUploads((prev) =>
-        prev.map((u) =>
-          u.file === file ? { ...u, status: "complete" as const } : u
-        )
+        prev.map((u) => (u.file === file ? { ...u, status: 'complete' as const } : u))
       );
 
       // Invalidate memory query to refetch
-      queryClient.invalidateQueries({ queryKey: ["memory", slug] });
+      queryClient.invalidateQueries({ queryKey: ['memory', slug] });
 
       // Remove from upload list after 2 seconds
       setTimeout(() => {
@@ -87,7 +75,7 @@ export const UploadWidget = ({ slug }: UploadWidgetProps) => {
           u.file === file
             ? {
                 ...u,
-                status: "error" as const,
+                status: 'error' as const,
                 error: (error as Error).message,
               }
             : u
@@ -103,7 +91,7 @@ export const UploadWidget = ({ slug }: UploadWidgetProps) => {
     const newUploads: UploadProgress[] = files.map((file) => ({
       file,
       progress: 0,
-      status: "pending",
+      status: 'pending',
     }));
 
     setUploads((prev) => [...prev, ...newUploads]);
@@ -115,7 +103,7 @@ export const UploadWidget = ({ slug }: UploadWidgetProps) => {
 
     // Reset input
     if (fileInputRef.current) {
-      fileInputRef.current.value = "";
+      fileInputRef.current.value = '';
     }
   };
 
@@ -127,12 +115,7 @@ export const UploadWidget = ({ slug }: UploadWidgetProps) => {
     <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl p-6 sm:p-8 border border-purple-100">
       <div className="flex items-center gap-3 mb-6">
         <div className="flex-shrink-0 w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center">
-          <svg
-            className="w-7 h-7 text-white"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
+          <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -142,12 +125,8 @@ export const UploadWidget = ({ slug }: UploadWidgetProps) => {
           </svg>
         </div>
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">
-            Share Your Photos & Videos
-          </h2>
-          <p className="text-sm text-gray-600">
-            Capture and upload your favorite moments
-          </p>
+          <h2 className="text-2xl font-bold text-gray-900">Share Your Photos & Videos</h2>
+          <p className="text-sm text-gray-600">Capture and upload your favorite moments</p>
         </div>
       </div>
 
@@ -155,12 +134,7 @@ export const UploadWidget = ({ slug }: UploadWidgetProps) => {
         onClick={openFileDialog}
         className="w-full bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 hover:from-indigo-700 hover:via-purple-700 hover:to-pink-700 text-white font-bold py-5 px-6 rounded-xl transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-3 touch-manipulation shadow-lg hover:shadow-xl"
       >
-        <svg
-          className="w-7 h-7"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
+        <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -200,13 +174,9 @@ export const UploadWidget = ({ slug }: UploadWidgetProps) => {
                   {upload.file.name}
                 </span>
                 <span className="flex items-center gap-1.5 text-xs font-bold ml-2">
-                  {upload.status === "complete" && (
+                  {upload.status === 'complete' && (
                     <span className="flex items-center gap-1 text-emerald-600">
-                      <svg
-                        className="w-4 h-4"
-                        fill="currentColor"
-                        viewBox="0 0 20 20"
-                      >
+                      <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                         <path
                           fillRule="evenodd"
                           d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
@@ -216,13 +186,9 @@ export const UploadWidget = ({ slug }: UploadWidgetProps) => {
                       Done
                     </span>
                   )}
-                  {upload.status === "error" && (
+                  {upload.status === 'error' && (
                     <span className="flex items-center gap-1 text-red-600">
-                      <svg
-                        className="w-4 h-4"
-                        fill="currentColor"
-                        viewBox="0 0 20 20"
-                      >
+                      <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                         <path
                           fillRule="evenodd"
                           d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
@@ -232,18 +198,12 @@ export const UploadWidget = ({ slug }: UploadWidgetProps) => {
                       Failed
                     </span>
                   )}
-                  {upload.status === "uploading" && (
-                    <span className="text-indigo-600">
-                      {Math.round(upload.progress)}%
-                    </span>
+                  {upload.status === 'uploading' && (
+                    <span className="text-indigo-600">{Math.round(upload.progress)}%</span>
                   )}
-                  {upload.status === "processing" && (
+                  {upload.status === 'processing' && (
                     <span className="flex items-center gap-1 text-purple-600">
-                      <svg
-                        className="animate-spin w-3 h-3"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                      >
+                      <svg className="animate-spin w-3 h-3" fill="none" viewBox="0 0 24 24">
                         <circle
                           className="opacity-25"
                           cx="12"
@@ -261,13 +221,11 @@ export const UploadWidget = ({ slug }: UploadWidgetProps) => {
                       Processing
                     </span>
                   )}
-                  {upload.status === "pending" && (
-                    <span className="text-gray-500">Pending...</span>
-                  )}
+                  {upload.status === 'pending' && <span className="text-gray-500">Pending...</span>}
                 </span>
               </div>
 
-              {upload.status !== "complete" && upload.status !== "error" && (
+              {upload.status !== 'complete' && upload.status !== 'error' && (
                 <div className="w-full bg-white rounded-full h-2.5 shadow-inner">
                   <div
                     className="bg-gradient-to-r from-indigo-500 to-purple-600 h-2.5 rounded-full transition-all duration-300 ease-out"
@@ -278,9 +236,7 @@ export const UploadWidget = ({ slug }: UploadWidgetProps) => {
 
               {upload.error && (
                 <div className="mt-2 p-2 bg-red-50 border border-red-200 rounded-lg">
-                  <p className="text-xs text-red-700 font-medium">
-                    {upload.error}
-                  </p>
+                  <p className="text-xs text-red-700 font-medium">{upload.error}</p>
                 </div>
               )}
             </div>
@@ -296,15 +252,15 @@ async function getFileDimensions(
   file: File
 ): Promise<{ width?: number; height?: number; duration?: number }> {
   return new Promise((resolve) => {
-    if (file.type.startsWith("image/")) {
+    if (file.type.startsWith('image/')) {
       const img = new Image();
       img.onload = () => {
         resolve({ width: img.width, height: img.height });
       };
       img.onerror = () => resolve({});
       img.src = URL.createObjectURL(file);
-    } else if (file.type.startsWith("video/")) {
-      const video = document.createElement("video");
+    } else if (file.type.startsWith('video/')) {
+      const video = document.createElement('video');
       video.onloadedmetadata = () => {
         resolve({
           width: video.videoWidth,

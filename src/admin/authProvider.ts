@@ -1,5 +1,5 @@
-import { AuthProvider } from "react-admin";
-import { apiClient } from "@/lib/api-client";
+import { AuthProvider } from 'react-admin';
+import { apiClient } from '@/lib/api-client';
 
 export const authProvider: AuthProvider = {
   login: async ({ username, password }) => {
@@ -7,7 +7,7 @@ export const authProvider: AuthProvider = {
       await apiClient.login({ email: username, password });
       return Promise.resolve();
     } catch (error) {
-      return Promise.reject(new Error("Invalid credentials"));
+      return Promise.reject(new Error('Invalid credentials'));
     }
   },
 
@@ -17,7 +17,7 @@ export const authProvider: AuthProvider = {
   },
 
   checkAuth: async () => {
-    const token = localStorage.getItem("accessToken");
+    const token = localStorage.getItem('accessToken');
     return token ? Promise.resolve() : Promise.reject();
   },
 
@@ -35,14 +35,14 @@ export const authProvider: AuthProvider = {
   },
 
   getIdentity: async () => {
-    const token = localStorage.getItem("accessToken");
+    const token = localStorage.getItem('accessToken');
     if (!token) {
       return Promise.reject();
     }
 
     // Decode JWT to get user info (simple base64 decode)
     try {
-      const payload = JSON.parse(atob(token.split(".")[1]));
+      const payload = JSON.parse(atob(token.split('.')[1]));
       return Promise.resolve({
         id: payload.sub,
         fullName: payload.email,

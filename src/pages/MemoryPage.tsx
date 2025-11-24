@@ -1,11 +1,11 @@
-import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { apiClient } from "@/lib/api-client";
-import { memorySocketClient } from "@/lib/socket-client";
-import { UploadWidget } from "@/components/UploadWidget";
-import { Gallery } from "@/components/Gallery";
-import type { MediaItem } from "@/types";
+import { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { apiClient } from '@/lib/api-client';
+import { memorySocketClient } from '@/lib/socket-client';
+import { UploadWidget } from '@/components/UploadWidget';
+import { Gallery } from '@/components/Gallery';
+import type { MediaItem } from '@/types';
 
 export const MemoryPage = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -14,7 +14,7 @@ export const MemoryPage = () => {
 
   // Fetch memory data
   const { data, isLoading, error } = useQuery({
-    queryKey: ["memory", slug],
+    queryKey: ['memory', slug],
     queryFn: () => apiClient.getMemoryBySlug(slug!),
     enabled: !!slug,
   });
@@ -27,7 +27,7 @@ export const MemoryPage = () => {
 
     const handleNewMedia = (mediaItem: MediaItem) => {
       // Add new media to the query cache
-      queryClient.setQueryData(["memory", slug], (old: any) => {
+      queryClient.setQueryData(['memory', slug], (old: any) => {
         if (!old) return old;
         return {
           ...old,
@@ -60,9 +60,7 @@ export const MemoryPage = () => {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
         <div className="text-center max-w-md">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            Memory Not Found
-          </h1>
+          <h1 className="text-4xl font-bold text-gray-900 mb-4">Memory Not Found</h1>
           <p className="text-gray-600">
             The memory you're looking for doesn't exist or has been removed.
           </p>
@@ -79,11 +77,7 @@ export const MemoryPage = () => {
       <header className="relative bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 text-white overflow-hidden">
         {memory.coverUrl && (
           <div className="absolute inset-0 opacity-20">
-            <img
-              src={memory.coverUrl}
-              alt="Cover"
-              className="w-full h-full object-cover"
-            />
+            <img src={memory.coverUrl} alt="Cover" className="w-full h-full object-cover" />
           </div>
         )}
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
@@ -97,12 +91,7 @@ export const MemoryPage = () => {
               </p>
             )}
             <div className="flex items-center justify-center gap-2 text-white/80">
-              <svg
-                className="w-5 h-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -111,11 +100,11 @@ export const MemoryPage = () => {
                 />
               </svg>
               <time className="text-sm sm:text-base font-medium">
-                {new Date(memory.eventDate).toLocaleDateString("en-US", {
-                  weekday: "long",
-                  year: "numeric",
-                  month: "long",
-                  day: "numeric",
+                {new Date(memory.eventDate).toLocaleDateString('en-US', {
+                  weekday: 'long',
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric',
                 })}
               </time>
             </div>
@@ -152,12 +141,8 @@ export const MemoryPage = () => {
       {/* Footer */}
       <footer className="mt-16 py-8 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <p className="text-white/90 text-sm font-medium">
-            Made with ❤️ by Memory App
-          </p>
-          <p className="text-white/60 text-xs mt-2">
-            Capturing moments that matter
-          </p>
+          <p className="text-white/90 text-sm font-medium">Made with ❤️ by Memory App</p>
+          <p className="text-white/60 text-xs mt-2">Capturing moments that matter</p>
         </div>
       </footer>
     </div>

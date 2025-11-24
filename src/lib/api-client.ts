@@ -1,4 +1,4 @@
-import axios, { AxiosInstance, AxiosError } from "axios";
+import axios, { AxiosInstance, AxiosError } from 'axios';
 import type {
   AuthTokens,
   LoginRequest,
@@ -9,9 +9,9 @@ import type {
   RequestUploadResponse,
   CompleteUploadRequest,
   MediaItem,
-} from "@/types";
+} from '@/types';
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3001";
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
 class ApiClient {
   private client: AxiosInstance;
@@ -21,7 +21,7 @@ class ApiClient {
     this.client = axios.create({
       baseURL: API_URL,
       headers: {
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
       },
     });
 
@@ -39,11 +39,11 @@ class ApiClient {
       async (error: AxiosError) => {
         if (error.response?.status === 401) {
           // Try to refresh token
-          const refreshToken = localStorage.getItem("refreshToken");
+          const refreshToken = localStorage.getItem('refreshToken');
           if (refreshToken) {
             try {
               const { data } = await this.client.post<AuthTokens>(
-                "/admin/auth/refresh",
+                '/admin/auth/refresh',
                 {},
                 {
                   headers: { Authorization: `Bearer ${refreshToken}` },
@@ -57,7 +57,7 @@ class ApiClient {
               }
             } catch (refreshError) {
               this.clearTokens();
-              window.location.href = "/admin/login";
+              window.location.href = '/admin/login';
             }
           }
         }
@@ -66,27 +66,24 @@ class ApiClient {
     );
 
     // Load tokens from localStorage
-    this.accessToken = localStorage.getItem("accessToken");
+    this.accessToken = localStorage.getItem('accessToken');
   }
 
   setTokens(tokens: AuthTokens) {
     this.accessToken = tokens.accessToken;
-    localStorage.setItem("accessToken", tokens.accessToken);
-    localStorage.setItem("refreshToken", tokens.refreshToken);
+    localStorage.setItem('accessToken', tokens.accessToken);
+    localStorage.setItem('refreshToken', tokens.refreshToken);
   }
 
   clearTokens() {
     this.accessToken = null;
-    localStorage.removeItem("accessToken");
-    localStorage.removeItem("refreshToken");
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
   }
 
   // Auth endpoints
   async login(credentials: LoginRequest): Promise<AuthTokens> {
-    const { data } = await this.client.post<AuthTokens>(
-      "/admin/auth/login",
-      credentials
-    );
+    const { data } = await this.client.post<AuthTokens>('/admin/auth/login', credentials);
     this.setTokens(data);
     return data;
   }
@@ -97,55 +94,37 @@ class ApiClient {
 
   // Admin memory endpoints
   async createMemory(formData: FormData): Promise<Memory> {
-    const { data } = await this.client.post<Memory>(
-      "/admin/memories",
-      formData,
-      {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      }
-    );
+    const { data } = await this.client.post<Memory>('/admin/memories', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
     return data;
   }
 
   async listMemories(page = 1, limit = 20): Promise<MemoryListResponse> {
-    const { data } = await this.client.get<MemoryListResponse>(
-      "/admin/memories",
-      { params: { page, limit } }
-    );
+    const { data } = await this.client.get<MemoryListResponse>('/admin/memories', {
+      params: { page, limit },
+    });
     return data;
   }
 
-  async getMemoryBySlugAdmin(
-    slug: string,
-    page = 1,
-    limit = 50
-  ): Promise<MemoryWithMedia> {
-    const { data } = await this.client.get<MemoryWithMedia>(
-      `/admin/memories/${slug}`,
-      { params: { page, limit } }
-    );
+  async getMemoryBySlugAdmin(slug: string, page = 1, limit = 50): Promise<MemoryWithMedia> {
+    const { data } = await this.client.get<MemoryWithMedia>(`/admin/memories/${slug}`, {
+      params: { page, limit },
+    });
     return data;
   }
 
   // Public memory endpoints
-  async getMemoryBySlug(
-    slug: string,
-    page = 1,
-    limit = 50
-  ): Promise<MemoryWithMedia> {
-    const { data } = await this.client.get<MemoryWithMedia>(
-      `/memories/${slug}`,
-      { params: { page, limit } }
-    );
+  async getMemoryBySlug(slug: string, page = 1, limit = 50): Promise<MemoryWithMedia> {
+    const { data } = await this.client.get<MemoryWithMedia>(`/memories/${slug}`, {
+      params: { page, limit },
+    });
     return data;
   }
 
-  async requestUpload(
-    slug: string,
-    request: RequestUploadRequest
-  ): Promise<RequestUploadResponse> {
+  async requestUpload(slug: string, request: RequestUploadRequest): Promise<RequestUploadResponse> {
     const { data } = await this.client.post<RequestUploadResponse>(
       `/memories/${slug}/uploads/request`,
       request
@@ -153,10 +132,7 @@ class ApiClient {
     return data;
   }
 
-  async completeUpload(
-    slug: string,
-    request: CompleteUploadRequest
-  ): Promise<MediaItem> {
+  async completeUpload(slug: string, request: CompleteUploadRequest): Promise<MediaItem> {
     const { data } = await this.client.post<MediaItem>(
       `/memories/${slug}/uploads/complete`,
       request
@@ -191,8 +167,8 @@ class ApiClient {
   ): Promise<void> {
     await axios.put(signedUrl, file, {
       headers: {
-        "Content-Type": file.type,
-        "x-upsert": "false",
+        'Content-Type': file.type,
+        'x-upsert': 'false',
       },
       onUploadProgress: (progressEvent) => {
         if (onProgress && progressEvent.total) {

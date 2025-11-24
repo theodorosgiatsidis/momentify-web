@@ -1,6 +1,6 @@
-import { Routes, Route, Navigate } from "react-router-dom";
-import { AdminApp } from "./admin/AdminApp";
-import { MemoryPage } from "./pages/MemoryPage";
+import { Routes, Route, Navigate } from 'react-router-dom';
+import { AdminApp } from './admin/AdminApp';
+import { MemoryPage } from './pages/MemoryPage';
 
 function App() {
   return (

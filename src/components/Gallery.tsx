@@ -1,5 +1,5 @@
-import { useState } from "react";
-import type { MediaItem } from "@/types";
+import { useState } from 'react';
+import type { MediaItem } from '@/types';
 
 interface GalleryProps {
   mediaItems: MediaItem[];
@@ -28,18 +28,10 @@ export const Gallery = ({ mediaItems }: GalleryProps) => {
             />
           </svg>
         </div>
-        <h3 className="mt-6 text-2xl font-bold text-gray-900">
-          No photos or videos yet
-        </h3>
-        <p className="mt-3 text-gray-600 text-lg">
-          Be the first to share a memory!
-        </p>
+        <h3 className="mt-6 text-2xl font-bold text-gray-900">No photos or videos yet</h3>
+        <p className="mt-3 text-gray-600 text-lg">Be the first to share a memory!</p>
         <div className="mt-4 inline-flex items-center gap-2 text-purple-600 font-medium">
-          <svg
-            className="w-5 h-5 animate-bounce"
-            fill="currentColor"
-            viewBox="0 0 20 20"
-          >
+          <svg className="w-5 h-5 animate-bounce" fill="currentColor" viewBox="0 0 20 20">
             <path
               fillRule="evenodd"
               d="M5.293 9.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 7.414V15a1 1 0 11-2 0V7.414L6.707 9.707a1 1 0 01-1.414 0z"
@@ -65,7 +57,7 @@ export const Gallery = ({ mediaItems }: GalleryProps) => {
             className="group relative aspect-square bg-gradient-to-br from-gray-100 to-gray-200 rounded-xl overflow-hidden cursor-pointer transform transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:z-10"
             onClick={() => setSelectedMedia(media)}
           >
-            {media.mimeType.startsWith("image/") ? (
+            {media.mimeType.startsWith('image/') ? (
               <>
                 {!imageLoaded.has(media.id) && (
                   <div className="absolute inset-0 flex items-center justify-center">
@@ -79,7 +71,7 @@ export const Gallery = ({ mediaItems }: GalleryProps) => {
                   src={media.url}
                   alt={media.filename}
                   className={`w-full h-full object-cover transition-opacity duration-300 ${
-                    imageLoaded.has(media.id) ? "opacity-100" : "opacity-0"
+                    imageLoaded.has(media.id) ? 'opacity-100' : 'opacity-0'
                   }`}
                   onLoad={() => handleImageLoad(media.id)}
                   loading="lazy"
@@ -95,12 +87,7 @@ export const Gallery = ({ mediaItems }: GalleryProps) => {
               </>
             ) : (
               <>
-                <video
-                  src={media.url}
-                  className="w-full h-full object-cover"
-                  muted
-                  playsInline
-                />
+                <video src={media.url} className="w-full h-full object-cover" muted playsInline />
                 {/* Video play icon */}
                 <div className="absolute inset-0 flex items-center justify-center bg-black/30 group-hover:bg-black/40 transition-colors">
                   <div className="bg-white/90 rounded-full p-3 group-hover:scale-110 transition-transform shadow-xl">
@@ -130,12 +117,7 @@ export const Gallery = ({ mediaItems }: GalleryProps) => {
             onClick={() => setSelectedMedia(null)}
             aria-label="Close"
           >
-            <svg
-              className="w-6 h-6"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -149,12 +131,12 @@ export const Gallery = ({ mediaItems }: GalleryProps) => {
             className="max-w-7xl max-h-full animate-scale-in"
             onClick={(e) => e.stopPropagation()}
           >
-            {selectedMedia.mimeType.startsWith("image/") ? (
+            {selectedMedia.mimeType.startsWith('image/') ? (
               <img
                 src={selectedMedia.url}
                 alt={selectedMedia.filename}
                 className="max-w-full max-h-[85vh] object-contain rounded-lg shadow-2xl touch-pinch-zoom"
-                style={{ userSelect: "none" }}
+                style={{ userSelect: 'none' }}
               />
             ) : (
               <video
@@ -173,12 +155,7 @@ export const Gallery = ({ mediaItems }: GalleryProps) => {
                 {selectedMedia.filename}
               </p>
               <p className="text-white/70 text-xs sm:text-sm mt-2 flex items-center justify-center gap-2">
-                <svg
-                  className="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"

@@ -1,7 +1,7 @@
-import { io, Socket } from "socket.io-client";
-import type { MediaItem } from "@/types";
+import { io, Socket } from 'socket.io-client';
+import type { MediaItem } from '@/types';
 
-const WS_URL = import.meta.env.VITE_WS_URL || "ws://localhost:3001";
+const WS_URL = import.meta.env.VITE_WS_URL || 'ws://localhost:3001';
 
 export class MemorySocketClient {
   private socket: Socket | null = null;
@@ -18,31 +18,31 @@ export class MemorySocketClient {
     this.memoryId = memoryId;
 
     this.socket = io(`${WS_URL}/memory`, {
-      transports: ["websocket", "polling"],
+      transports: ['websocket', 'polling'],
       reconnection: true,
       reconnectionDelay: 1000,
       reconnectionDelayMax: 5000,
       reconnectionAttempts: this.maxReconnectAttempts,
     });
 
-    this.socket.on("connect", () => {
-      console.log("WebSocket connected");
+    this.socket.on('connect', () => {
+      console.log('WebSocket connected');
       this.reconnectAttempts = 0;
       if (this.socket && this.memoryId) {
-        this.socket.emit("join", this.memoryId);
+        this.socket.emit('join', this.memoryId);
       }
     });
 
-    this.socket.on("disconnect", (reason) => {
-      console.log("WebSocket disconnected:", reason);
+    this.socket.on('disconnect', (reason) => {
+      console.log('WebSocket disconnected:', reason);
     });
 
-    this.socket.on("connect_error", (error) => {
-      console.error("WebSocket connection error:", error);
+    this.socket.on('connect_error', (error) => {
+      console.error('WebSocket connection error:', error);
       this.reconnectAttempts++;
 
       if (this.reconnectAttempts >= this.maxReconnectAttempts) {
-        console.error("Max reconnection attempts reached");
+        console.error('Max reconnection attempts reached');
         this.disconnect();
       }
     });
@@ -53,7 +53,7 @@ export class MemorySocketClient {
   disconnect() {
     if (this.socket) {
       if (this.memoryId) {
-        this.socket.emit("leave", this.memoryId);
+        this.socket.emit('leave', this.memoryId);
       }
       this.socket.disconnect();
       this.socket = null;
@@ -64,20 +64,20 @@ export class MemorySocketClient {
 
   onNewMedia(callback: (mediaItem: MediaItem) => void) {
     if (!this.socket) {
-      console.warn("Socket not connected");
+      console.warn('Socket not connected');
       return;
     }
 
-    this.socket.on("newMedia", callback);
+    this.socket.on('newMedia', callback);
   }
 
   offNewMedia(callback?: (mediaItem: MediaItem) => void) {
     if (!this.socket) return;
 
     if (callback) {
-      this.socket.off("newMedia", callback);
+      this.socket.off('newMedia', callback);
     } else {
-      this.socket.off("newMedia");
+      this.socket.off('newMedia');
     }
   }
 
