@@ -4,9 +4,10 @@ import type { MediaItem } from '@/types';
 
 interface GalleryProps {
   mediaItems: MediaItem[];
+  isLoading?: boolean;
 }
 
-export const Gallery = ({ mediaItems }: GalleryProps) => {
+export const Gallery = ({ mediaItems, isLoading = false }: GalleryProps) => {
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const [imageLoaded, setImageLoaded] = useState<Set<string>>(new Set());
   const [slideDirection, setSlideDirection] = useState<'left' | 'right' | null>(null);
@@ -116,6 +117,24 @@ export const Gallery = ({ mediaItems }: GalleryProps) => {
 
     setTouchStart(null);
   };
+
+  // Skeleton loader component
+  const SkeletonLoader = () => (
+    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
+      {[...Array(8)].map((_, index) => (
+        <div
+          key={index}
+          className="aspect-square bg-gradient-to-br from-gray-200 to-gray-300 rounded-xl overflow-hidden animate-pulse"
+        >
+          <div className="w-full h-full bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 bg-[length:200%_100%] animate-shimmer"></div>
+        </div>
+      ))}
+    </div>
+  );
+
+  if (isLoading) {
+    return <SkeletonLoader />;
+  }
 
   if (mediaItems.length === 0) {
     return (

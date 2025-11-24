@@ -20,6 +20,7 @@ export default {
       animation: {
         enter: 'enter 200ms ease-out',
         leave: 'leave 150ms ease-in forwards',
+        shimmer: 'shimmer 2s infinite',
       },
       keyframes: {
         enter: {
@@ -29,6 +30,10 @@ export default {
         leave: {
           '0%': { transform: 'scale(1)', opacity: '1' },
           '100%': { transform: 'scale(0.9)', opacity: '0' },
+        },
+        shimmer: {
+          '0%': { backgroundPosition: '-200% 0' },
+          '100%': { backgroundPosition: '200% 0' },
         },
       },
     },

@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '@/lib/api-client';
 import { memorySocketClient } from '@/lib/socket-client';
-import { showLiveUpdateToast } from '@/lib/toast-utils';
+import { showLiveUpdateToast, showSuccessToast } from '@/lib/toast-utils';
 import { UploadWidget } from '@/components/UploadWidget';
 import { Gallery } from '@/components/Gallery';
 import type { MediaItem } from '@/types';
@@ -78,6 +78,28 @@ export const MemoryPage = () => {
 
   const { memory, mediaItems } = data;
 
+  const handleCopyLink = async () => {
+    const url = window.location.href;
+    try {
+      await navigator.clipboard.writeText(url);
+      showSuccessToast('Link copied to clipboard!');
+    } catch (error) {
+      console.error('Failed to copy link:', error);
+      // Fallback for older browsers
+      const textArea = document.createElement('textarea');
+      textArea.value = url;
+      document.body.appendChild(textArea);
+      textArea.select();
+      try {
+        document.execCommand('copy');
+        showSuccessToast('Link copied to clipboard!');
+      } catch (err) {
+        console.error('Fallback copy failed:', err);
+      }
+      document.body.removeChild(textArea);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50">
       {/* Hero Header with Cover Image */}
@@ -115,6 +137,23 @@ export const MemoryPage = () => {
                 })}
               </time>
             </div>
+
+            {/* Copy Link Button */}
+            <button
+              onClick={handleCopyLink}
+              className="mt-6 inline-flex items-center gap-2 px-6 py-3 bg-white/20 hover:bg-white/30 backdrop-blur-md rounded-xl text-white font-semibold transition-all duration-300 transform hover:scale-105 active:scale-95 border border-white/30 shadow-lg"
+              aria-label="Copy memory link"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
+                />
+              </svg>
+              <span>Copy Link to Share</span>
+            </button>
           </div>
         </div>
         <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-indigo-50 to-transparent"></div>
@@ -142,7 +181,7 @@ export const MemoryPage = () => {
 
       {/* Gallery */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <Gallery mediaItems={mediaItems} />
+        <Gallery mediaItems={mediaItems} isLoading={isLoading} />
       </div>
 
       {/* Footer */}
