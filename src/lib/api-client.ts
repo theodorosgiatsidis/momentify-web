@@ -161,7 +161,23 @@ class ApiClient {
   }
 
   async deleteMediaItem(mediaId: string): Promise<void> {
-    await this.client.delete(`/memories/media/${mediaId}`);
+    await this.client.delete(`/admin/media/${mediaId}`);
+  }
+
+  async listMedia(
+    page = 1,
+    limit = 25,
+    filters?: { filename?: string; memorySlug?: string }
+  ): Promise<{ data: any[]; total: number; page: number; totalPages: number }> {
+    const { data } = await this.client.get('/admin/media', {
+      params: { page, limit, ...filters },
+    });
+    return data;
+  }
+
+  async getMediaItem(mediaId: string): Promise<any> {
+    const { data } = await this.client.get(`/admin/media/${mediaId}`);
+    return data;
   }
 
   async deleteMemory(slug: string): Promise<void> {

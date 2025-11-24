@@ -21,6 +21,25 @@ export const dataProvider: DataProvider = {
       };
     }
 
+    if (resource === 'media') {
+      const filters: any = {};
+      if (params.filter?.filename) {
+        filters.filename = params.filter.filename;
+      }
+      if (params.filter?.memorySlug) {
+        filters.memorySlug = params.filter.memorySlug;
+      }
+
+      const data = await apiClient.listMedia(page, perPage, filters);
+      return {
+        data: data.data.map((item) => ({
+          ...item,
+          id: item.id,
+        })) as any,
+        total: data.total,
+      };
+    }
+
     throw new Error(`Unknown resource: ${resource}`);
   },
 
@@ -35,6 +54,16 @@ export const dataProvider: DataProvider = {
           id: data.memory.slug, // Use slug as ID for React Admin
           uuid, // Keep UUID for reference
           mediaItems: data.mediaItems,
+        } as any,
+      };
+    }
+
+    if (resource === 'media') {
+      const data = await apiClient.getMediaItem(params.id as string);
+      return {
+        data: {
+          ...data,
+          id: data.id,
         } as any,
       };
     }
