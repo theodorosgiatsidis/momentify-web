@@ -18,14 +18,38 @@ export const authProvider: AuthProvider = {
 
   checkAuth: async () => {
     const token = localStorage.getItem('accessToken');
-    return token ? Promise.resolve() : Promise.reject();
+    if (!token) {
+      return Promise.reject({ message: 'No authentication token found' });
+    }
+
+    // Check if token is expired
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      const expiresAt = payload.exp * 1000; // Convert to milliseconds
+
+      if (Date.now() >= expiresAt) {
+        apiClient.clearTokens();
+        return Promise.reject({
+          message: 'Your session has expired. Please login again.',
+          redirectTo: '/login',
+        });
+      }
+
+      return Promise.resolve();
+    } catch {
+      apiClient.clearTokens();
+      return Promise.reject({ message: 'Invalid authentication token' });
+    }
   },
 
   checkError: async (error) => {
     const status = error.status;
     if (status === 401 || status === 403) {
       apiClient.clearTokens();
-      return Promise.reject();
+      return Promise.reject({
+        message: 'Your session has expired. Please login again.',
+        logoutUser: true,
+      });
     }
     return Promise.resolve();
   },
