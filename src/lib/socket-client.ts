@@ -1,7 +1,7 @@
 import { io, Socket } from 'socket.io-client';
 import type { MediaItem } from '@/types';
 
-const WS_URL = import.meta.env.VITE_WS_URL || 'ws://localhost:3001';
+const WS_URL = import.meta.env.VITE_WS_URL || 'http://localhost:3001';
 
 export class MemorySocketClient {
   private socket: Socket | null = null;
@@ -11,11 +11,14 @@ export class MemorySocketClient {
 
   connect(memoryId: string) {
     if (this.socket && this.memoryId === memoryId) {
+      console.log('Already connected to memory:', memoryId);
       return; // Already connected to this memory
     }
 
     this.disconnect();
     this.memoryId = memoryId;
+
+    console.log(`Connecting to WebSocket: ${WS_URL}/memory for memory: ${memoryId}`);
 
     this.socket = io(`${WS_URL}/memory`, {
       transports: ['websocket', 'polling'],
@@ -26,19 +29,20 @@ export class MemorySocketClient {
     });
 
     this.socket.on('connect', () => {
-      console.log('WebSocket connected');
+      console.log('✅ WebSocket connected, socket id:', this.socket?.id);
       this.reconnectAttempts = 0;
       if (this.socket && this.memoryId) {
+        console.log('Joining memory room:', this.memoryId);
         this.socket.emit('join', this.memoryId);
       }
     });
 
     this.socket.on('disconnect', (reason) => {
-      console.log('WebSocket disconnected:', reason);
+      console.log('❌ WebSocket disconnected:', reason);
     });
 
     this.socket.on('connect_error', (error) => {
-      console.error('WebSocket connection error:', error);
+      console.error('❌ WebSocket connection error:', error);
       this.reconnectAttempts++;
 
       if (this.reconnectAttempts >= this.maxReconnectAttempts) {
@@ -68,7 +72,11 @@ export class MemorySocketClient {
       return;
     }
 
-    this.socket.on('newMedia', callback);
+    console.log('Registering newMedia listener');
+    this.socket.on('newMedia', (mediaItem: MediaItem) => {
+      console.log('📸 Received new media event:', mediaItem);
+      callback(mediaItem);
+    });
   }
 
   offNewMedia(callback?: (mediaItem: MediaItem) => void) {

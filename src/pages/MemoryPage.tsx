@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '@/lib/api-client';
 import { memorySocketClient } from '@/lib/socket-client';
+import { showLiveUpdateToast } from '@/lib/toast-utils';
 import { UploadWidget } from '@/components/UploadWidget';
 import { Gallery } from '@/components/Gallery';
 import type { MediaItem } from '@/types';
@@ -34,6 +35,12 @@ export const MemoryPage = () => {
           mediaItems: [mediaItem, ...old.mediaItems],
         };
       });
+
+      // Show live update toast notification
+      showLiveUpdateToast(
+        'Someone just uploaded a photo!',
+        mediaItem.thumbnailUrl || mediaItem.url
+      );
     };
 
     memorySocketClient.onNewMedia(handleNewMedia);

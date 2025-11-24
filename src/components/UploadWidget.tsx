@@ -1,6 +1,7 @@
 import { useState, useRef, ChangeEvent } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '@/lib/api-client';
+import { showSuccessToast, showErrorToast } from '@/lib/toast-utils';
 
 interface UploadWidgetProps {
   slug: string;
@@ -61,6 +62,9 @@ export const UploadWidget = ({ slug }: UploadWidgetProps) => {
         prev.map((u) => (u.file === file ? { ...u, status: 'complete' as const } : u))
       );
 
+      // Show success toast
+      showSuccessToast(`${file.name} uploaded successfully!`);
+
       // Invalidate memory query to refetch
       queryClient.invalidateQueries({ queryKey: ['memory', slug] });
 
@@ -70,17 +74,21 @@ export const UploadWidget = ({ slug }: UploadWidgetProps) => {
       }, 2000);
     },
     onError: (error, file) => {
+      const errorMessage = (error as Error).message || 'Upload failed';
       setUploads((prev) =>
         prev.map((u) =>
           u.file === file
             ? {
                 ...u,
                 status: 'error' as const,
-                error: (error as Error).message,
+                error: errorMessage,
               }
             : u
         )
       );
+
+      // Show error toast
+      showErrorToast(`Failed to upload ${file.name}: ${errorMessage}`);
     },
   });
 
